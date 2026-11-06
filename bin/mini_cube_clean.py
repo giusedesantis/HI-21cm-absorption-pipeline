@@ -4,9 +4,10 @@ import os
 import sys
 import report
 import subprocess
-
+from config_utils import load_config
 from astropy.io import fits
 
+config = load_config()
 
 if len(sys.argv) != 6:
     print('ERROR: Incorrect number of parameters.')
@@ -17,6 +18,9 @@ obsid = sys.argv[2]
 robust = sys.argv[3]
 tukey = sys.argv[4]
 reportCsv = sys.argv[5]
+
+# Imaging directory specified by the config file    
+images_dir = Path(config["paths"]["images_dir"])
 
 # Define relavant file names and paths.
 metafits = obsid + '.metafits'
@@ -43,9 +47,12 @@ metaHdu.close()
 scale = basescale / metadata['CENTCHAN']
 scale = round(scale, 8)
 
+output_prefix = images_dir / str(obsid) / f"{obsid}_minicube_submodel"
+output_prefix.parent.mkdir(parents=True, exist_ok=True)
+
 # Clean the two main linear polizations.
 cleanCmd = f'''wsclean \
-    -name /scratch/mwasci/user/images/{obsid}/{obsid}_minicube_submodel \
+    -name {output_prefix} \
     -abs-mem 100 \
     -subtract-model \
     -mgain {mgain} \

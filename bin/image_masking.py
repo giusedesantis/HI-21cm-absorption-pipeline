@@ -4,9 +4,15 @@ import os
 import sys
 import report
 import subprocess
+from config_utils import load_config
 
 from astropy.io import fits
 
+config = load_config()
+
+# Directories specified by the config file    
+images_dir = Path(config["paths"]["images_dir"])
+masks_dir = Path(config["paths"]["masks_dir"])
 
 if len(sys.argv) != 6:
     print('ERROR: Incorrect number of parameters.')
@@ -42,12 +48,13 @@ metaHdu.close()
 scale = basescale / metadata['CENTCHAN']
 scale = round(scale, 8)
 
+mask_file = masks_dir / f"{obsid}_deep-MFS-image_mask.fits"
 
 # Clean the two main linear polizations.
 cleanCmd = f'''wsclean \
     -gridder wgridder \
     -abs-mem 100 \
-    -fits-mask /scratch/mwasci/user/masks/{obsid}_deep-MFS-image_mask.fits \
+    -fits-mask {mask_file} \
     -multiscale \
     -mgain {mgain} \
     -multiscale-gain 0.15 \

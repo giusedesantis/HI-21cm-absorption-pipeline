@@ -10,13 +10,11 @@
 #SBATCH --output=logs/%x_%A_%a.out
 #SBATCH --error=logs/%x_%A_%a.err
 
-projectDir="/scratch/mwasci/user/dip"
-reportCsv="/scratch/mwasci/${USER}/dip/new_report.csv"
+REPO_DIR="/scratch/mwasci/giuse/github_pipeline"
+CONFIG_FILE="${REPO_DIR}/config/config.yaml"
+
 paramstukey="875"
 paramsbriggs="0.0"
-
-obsid=$(sed -n "${SLURM_ARRAY_TASK_ID}p" obsids.txt)
-[[ -n "$obsid" ]] || { echo "obsid empty for task ${SLURM_ARRAY_TASK_ID}"; exit 1; }
 
 #module load singularity/4.1.0-slurm
 module load singularity/4.3.5-slurm
@@ -24,9 +22,44 @@ module load singularity/4.3.5-slurm
 module load cray-python/3.12.12
 CONTAINER=/software/projects/$PAWSEY_PROJECT/$USER/containers/dip.sif
 
-obsdir="/scratch/mwasci/user/small_cube_images_0856_40kHzflagchan/${obsid}"
+# Read shared paths from the YAML using the Python environment inside the container.
+# Requires PyYAML (import yaml) to be available in that container.
+config_values=$(singularity exec "$CONTAINER" python - "$CONFIG_FILE" <<'PYCONFIG'
+from pathlib import Path
+import sys
+import yaml
+
+config = yaml.safe_load(Path(sys.argv[1]).read_text())
+paths = config["paths"]
+for field in ("project_dir", "images_dir", "report_csv", "obsids_file"):
+    value = paths[field]
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"paths.{field} must be a nonempty string")
+    print(value)
+PYCONFIG
+) || { echo "Unable to read ${CONFIG_FILE} in the container" >&2; exit 1; }
+
+mapfile -t config_lines <<< "$config_values"
+if (( ${#config_lines[@]} != 4 )); then
+    echo "Expected four paths from ${CONFIG_FILE}" >&2
+    exit 1
+fi
+projectDir="${config_lines[0]}"
+imagesDir="${config_lines[1]}"
+reportCsv="${config_lines[2]}"
+obsidsFile="${config_lines[3]}"
+
+obsid=$(sed -n "${SLURM_ARRAY_TASK_ID}p" "$obsidsFile")
+[[ -n "$obsid" ]] || { echo "obsid empty for task ${SLURM_ARRAY_TASK_ID}"; exit 1; }
+
+# The report module now lives in download/, not bin/. Expose it to Python
+# running inside the Singularity container.
+export SINGULARITYENV_PYTHONPATH="${REPO_DIR}/download:${REPO_DIR}/bin"
+
+obsdir="${imagesDir}/${obsid}"
 workdir="${obsdir}/wsclean_retry_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
 state_dir="${obsdir}/.resume_state"
+
 
 cd "$obsdir" || {
     echo "Failed to enter $obsdir"
@@ -116,19 +149,19 @@ if ! step_done "field_template"; then
     cleanup_wsclean_products || exit 1
 fi
 run_step "field_template" "field_template.py" \
-    singularity exec "$CONTAINER" python /scratch/mwasci/user/dip/bin/field_template.py \
+    singularity exec "$CONTAINER" python ${REPO_DIR}/bin/field_template.py \
     "$projectDir" "$obsid" "$paramsbriggs" "$paramstukey" "$reportCsv"
 
 # Step 2: Create mask
 run_step "make_mask" "make_mask.py" \
-    singularity exec "$CONTAINER" python /scratch/mwasci/user/dip/make_mask.py "$obsid"
+    singularity exec "$CONTAINER" python ${REPO_DIR}/bin/make_mask.py "$obsid"
 
 # Step 3: Image using the mask
 if ! step_done "image_masking"; then
     cleanup_wsclean_products || exit 1
 fi
 run_step "image_masking" "image_masking.py" \
-    singularity exec "$CONTAINER" python /scratch/mwasci/user/dip/bin/image_masking.py \
+    singularity exec "$CONTAINER" python ${REPO_DIR}/bin/image_masking.py \
     "$projectDir" "$obsid" "$paramsbriggs" "$paramstukey" "$reportCsv"
 
 # Step 4: Copy the modified measurement set
@@ -146,5 +179,5 @@ if ! step_done "mini_cube_clean"; then
     cleanup_wsclean_products || exit 1
 fi
 run_step "mini_cube_clean" "mini_cube_clean.py" \
-    singularity exec "$CONTAINER" python /scratch/mwasci/user/dip/bin/mini_cube_clean.py \
+    singularity exec "$CONTAINER" python ${REPO_DIR}/bin/mini_cube_clean.py \
     "$projectDir" "$obsid" "$paramsbriggs" "$paramstukey" "$reportCsv"

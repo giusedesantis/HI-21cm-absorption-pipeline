@@ -7,7 +7,9 @@ import pandas as pd
 import report
 import subprocess
 from mantaray.api import Session
+from config_utils import load_config
 
+config = load_config()
 
 asvoPath = '/scratch/mwasci/asvo/'
 numberObs = 350
@@ -18,34 +20,9 @@ if not (len(sys.argv) >= 2 and len(sys.argv) <= 4):
 
 action = sys.argv[1]
 
-configFile = 'nextflow.config'
-if len(sys.argv) >= 3:
-    for i in range(2,len(sys.argv)):
-        if sys.argv[i].isnumeric():
-            numberObs = int(sys.argv[i])
-        else:
-            configFile = sys.argv[i]
-
-
-reportCsv = ''
-obsDir = ''
-with open(configFile) as f:
-    for line in f:
-        if 'reportCsv=' in line.replace(' ', ''):
-            reportCsv = line.split('=',1)[1].strip()
-            reportCsv = reportCsv.replace('"', '')
-            reportCsv = reportCsv.replace("'", "")
-            reportCsv = os.path.expandvars(reportCsv)
-        if 'obsdir=' in line.replace(' ', ''):
-            obsDir = line.split('=',1)[1].strip()
-            obsDir = obsDir.replace('"', '')
-            obsDir = obsDir.replace("'", "")
-            obsDir = os.path.expandvars(obsDir)
-
-if reportCsv == '' or obsDir == '':
-    print('Error: Unable to find the data entries in the nextflow.config.')
-    exit()
-
+# Reading paths from config.yaml
+reportCsv = config["paths"]["report_csv"]
+obsDir = config["paths"]["images_dir"]
 
 # Verify the download data is there, return True if it is, False if it is missing.
 def verifyDownload(obsid, jobid, quietMode=False):

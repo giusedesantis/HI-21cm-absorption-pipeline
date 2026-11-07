@@ -6,10 +6,12 @@
 # Input and output directories for images, masks, and logs. These should be absolute paths.
 # Replace these paths with your own directories.
 paths:
+  project_dir: "/path/to/your/project"
   images_dir: "/path/to/your/images"
   masks_dir: "/path/to/your/masks"
   logs_dir: "/path/to/your/logs"
-
+  report_csv: "/path/to/your/report.csv"
+  obsids_file: "/path/to/your/obsids.txt"
 # Target source information
 target:
   name: "GLEAM J0856+0224"

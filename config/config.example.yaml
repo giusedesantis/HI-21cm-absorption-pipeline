@@ -16,3 +16,17 @@ paths:
 target:
   name: "GLEAM J0856+0224"
   coordinates: "08:56:14.73 +02:23:59.6"
+  redshift: 5.55
+
+post_imaging:
+  back_resampling:
+    input_file: "/path/to/stack_10kHz.csv"
+    output_file: "/path/to/stack_20kHz_covariance.csv"
+    original_dir: "/path/to/original_spectra"
+    individual_dir: "/path/to/individual_spectra"
+    individual_glob: "spectrum_*.csv"
+    corrections_file: "/path/to/corrections.csv"
+
+  barycentric_correct:
+    obsids_csv: "/path/to/your/obsids.csv"
+    output_file: "/path/to/your/corrections.csv"

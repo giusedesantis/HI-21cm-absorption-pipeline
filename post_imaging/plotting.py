@@ -1,12 +1,29 @@
+import matplotlib
+matplotlib.use("Agg")
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from matplotlib.patches import Patch
+from config_utils import load_config
 
-output = Path("/scratch/mwasci/giuse/dip/final_spectra")
 
-csv_file = "/scratch/mwasci/giuse/dip/boxfilter_output/box_754_20kHz_covariance.csv"
+# Loading pipeline configuration
+config = load_config()
+
+# Plotting configuration
+settings = config["post_imaging"]["plotting"]
+
+# Directory for saving plots
+output = Path(settings["output_dir"])
+output.mkdir(parents=True, exist_ok=True)
+
+# Read the output from boxcar_filtering.py
+csv_file = Path(config["post_imaging"]["boxcar_filtering"]["output_file"])
+
+if not csv_file.is_file():
+    raise FileNotFoundError(f"Boxcar-filtered spectrum not found: {csv_file}")
 
 df = pd.read_csv(csv_file)
 

@@ -24,15 +24,42 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy import sparse
+from config_utils import load_config
 
 
 def main():
+    
+    # Load configuration
+    config = load_config()
+    settings = config["post_imaging"]["boxcar_filtering"]
+
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('input_csv', type=Path)
-    parser.add_argument('--covariance', type=Path, required=True,
-                        help='NPZ from back_resampling_with_covariance.py')
-    parser.add_argument('--binwidth', type=int, default=16)
-    parser.add_argument('-o', '--output', type=Path, default=None)
+
+    parser.add_argument(
+        "input_csv",
+        nargs="?",
+        type=Path,
+        default=Path(settings["input_csv"])
+    )
+
+    parser.add_argument(
+        "--covariance",
+        type=Path,
+        default=Path(settings["covariance_file"])
+    )
+
+    parser.add_argument(
+        "--binwidth",
+        type=int,
+        default=settings.get("binwidth", 16)
+    )
+
+    parser.add_argument(
+        "-o", "--output",
+        type=Path,
+        default=(Path(settings["output_file"]) if settings.get("output_file") else None)
+    )
+
     args = parser.parse_args()
 
     table = pd.read_csv(args.input_csv)

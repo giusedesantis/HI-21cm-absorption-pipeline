@@ -30,3 +30,15 @@ post_imaging:
   barycentric_correct:
     obsids_csv: "/path/to/your/obsids.csv"
     output_file: "/path/to/your/corrections.csv"
+
+  boxcar_filtering:
+    input_csv: "/path/to/stack_covariance.csv"
+    covariance_file: "/path/to/stack_covariance.npz"
+    output_file: "/path/to/boxcar_filtered.csv"
+    binwidth: 10
+
+  flux_fitting:
+    output_dir: "/path/to/spectral_cubes_resample"
+
+  plotting:
+    output_dir: "/path/to/final_spectra"

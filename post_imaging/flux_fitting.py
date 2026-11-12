@@ -14,15 +14,13 @@ invalid values, or non-positive input RMS keep output flux=0 and RMS=0.
 from pathlib import Path
 import numpy as np
 import pandas as pd
+from config_utils import load_config
 
-# --------------------------------------------------
-# Directories (same as your original program)
-# --------------------------------------------------
-output = Path("/scratch/mwasci/giuse/spectral_cubes_0856_10kHz_resample")
+config = load_config()
+settings = config["post_imaging"]["flux_fitting"]
 
-# --------------------------------------------------
-# Your existing sky-model parameters (unchanged)
-# --------------------------------------------------
+output = Path(settings["output_dir"])
+
 S_max = 0.85282
 alp = -0.98555
 q_val = -0.5097
@@ -30,10 +28,6 @@ q_val = -0.5097
 S_pow = 2.4943
 alp_pow = -0.65984
 
-# Flagged 40 kHz edge channels may appear as flux_Jy == 0 even when the
-# original input RMS is positive. Treat exact-zero raw flux as a flag.
-# Set False ONLY if your extraction can generate genuine valid zero-flux
-# measurements and provides an explicit channel_flagged column instead.
 TREAT_ZERO_INPUT_FLUX_AS_FLAGGED = True
 
 POLYNOMIAL_DEGREE = 3

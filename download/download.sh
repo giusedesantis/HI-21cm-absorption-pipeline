@@ -7,7 +7,8 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Singularity container
 CONTAINER="/software/projects/$PAWSEY_PROJECT/$USER/containers/mantaray.sif"
 
-module load singularity/4.1.0-slurm
+#module load singularity/4.1.0-slurm
+module load singularity/4.3.5-slurm
 
 # Make Python modules accessible inside Singularity
 export SINGULARITYENV_PYTHONPATH="${REPO_DIR}/download:${REPO_DIR}/bin"

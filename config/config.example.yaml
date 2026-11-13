@@ -42,3 +42,12 @@ post_imaging:
 
   plotting:
     output_dir: "/path/to/final_spectra"
+
+  resampling:
+    input_dir: "/path/to/original_spectral_cubes"
+    output_dir: "/path/to/resampled_spectral_cubes"
+
+  stacking:
+    input_dir: "/path/to/resampled_spectral_cubes"
+    output_csv: "/path/to/stack_10kHz.csv"
+    plot_file: "/path/to/stack_10kHz.png"

@@ -1,17 +1,23 @@
 from pathlib import Path
 import pandas as pd
 import numpy as np
+from config_utils import load_config
 
 # --------------------------------------------------
 # Directories
 # --------------------------------------------------
 
-input_dir = Path("/scratch/mwasci/giuse/spectral_cubes_0856_40kHz")
+config = load_config()
+settings = config["post_imaging"]["resampling"]
 
-output_dir = Path(
-    "/scratch/mwasci/giuse/spectral_cubes_0856_10kHz_resample"
-)
+input_dir = Path(settings["input_dir"])
+output_dir = Path(settings["output_dir"])
 
+# Verify the input directory exists
+if not input_dir.is_dir():
+    raise FileNotFoundError(f"Input directory does not exist: {input_dir}")
+
+# Create the output directory if necessary
 output_dir.mkdir(parents=True, exist_ok=True)
 
 # --------------------------------------------------
@@ -31,8 +37,10 @@ FREQ_OFFSET_MHZ = 0.005
 # --------------------------------------------------
 
 spec_files = sorted(input_dir.glob("*_spec.csv"))
-
 print(f"Found {len(spec_files)} spectra")
+
+if not spec_files:
+    raise FileNotFoundError(f"No *_spec.csv files found in {input_dir}")
 
 # --------------------------------------------------
 # Resample each spectrum

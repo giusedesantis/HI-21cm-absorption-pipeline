@@ -2,13 +2,27 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-#import barcorrect
-#import source_find
+from config_utils import load_config
 
-base = Path("/scratch/mwasci/giuse/dip")
-files = Path("/scratch/mwasci/giuse/spectral_cubes_0856_10kHz_resample")   #spectral_cubes_0856_10kHz_resample
+# Load configuration
+config = load_config()
 
-corr = pd.read_csv(base / "corrections.csv", dtype={"obsid": str})
+# Directory containing resampled spectra
+files = Path(config["post_imaging"]["resampling"]["output_dir"])
+
+# Barycentric corrections generated previously
+corrections_file = Path(config["post_imaging"]["barycentric_correct"]["output_file"])
+
+# Verify inputs exist
+if not files.is_dir():
+    raise FileNotFoundError(f"Spectra directory not found: {files}")
+
+if not corrections_file.is_file():
+    raise FileNotFoundError(f"Barycentric corrections not found: {corrections_file}")
+
+# Load corrections
+corr = pd.read_csv(corrections_file, dtype={"obsid": str})
+
 corr.columns = corr.columns.str.strip()
 corr["obsid"] = corr["obsid"].astype(str).str.strip()
 

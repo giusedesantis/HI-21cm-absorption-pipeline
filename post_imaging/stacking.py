@@ -1,22 +1,50 @@
+import matplotlib
+matplotlib.use("Agg")
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from matplotlib.patches import Patch
 
-#uncomment this part for old version
-base = Path("/scratch/mwasci/giuse/spectral_cubes_0856_10kHz_resample")  #
-output = Path("/scratch/mwasci/giuse/final_spec")
+from config_utils import load_config
+
+# Load configuration
+config = load_config()
+settings = config["post_imaging"]["stacking"]
+
+# Input directory
+base = Path(settings["input_dir"])
+
+# Output files
+out_path = Path(settings["output_csv"])
+plot_path = Path(settings["plot_file"])
+
+# Check input directory
+if not base.is_dir():
+    raise FileNotFoundError(f"Input directory does not exist: {base}")
+
+# Create output directories
+out_path.parent.mkdir(parents=True, exist_ok=True)
+plot_path.parent.mkdir(parents=True, exist_ok=True)
+
+# Find individual spectra
 files = sorted(base.glob("spectrum_*.csv"))
 
-FLUX_COL = "Subtracted flux(Jy)" #Subtracted flux(Jy) Simulated flux(Jy)
-RMS_COL = "rms (Jy)"
-FREQ_COL = "Freq(MHz)"  #Freq(MHz) Corrected Frequency (MHz)
+if not files:
+    raise FileNotFoundError(f"No spectrum_*.csv files found in {base}")
 
-# Frequencies rounded:
-FREQ_DECIMALS = 3   # e.g. 0.001 MHz bins; set to None to skip rounding
-nu_obs = 1420.4058 / (1 + 5.55)
-#print(nu_obs)
+# Column names
+FLUX_COL = "Subtracted flux(Jy)"
+RMS_COL = "rms (Jy)"
+FREQ_COL = "Freq(MHz)"
+
+# Frequency settings
+FREQ_DECIMALS = 3
+
+# Observed HI frequency
+z = config["target"]["redshift"]
+nu_obs = 1420.4058 / (1 + z)
 
 dfs = []
 for f in files:
@@ -92,7 +120,6 @@ out = (
 
 # optional for saving output
 out = out.sort_values(FREQ_COL, ignore_index=True)
-out_path = output / "stack_754_10kHz.csv"
 out.to_csv(out_path, index=False)
 
 data = pd.read_csv(out_path)
@@ -135,4 +162,5 @@ plt.xlabel('Frequency (MHz)')
 plt.ylabel('Flux (Jy)')
 plt.tight_layout()
 
-plt.savefig("/scratch/mwasci/giuse/dip/stacked_spectra_plots/stack_754_10kHz.png")
+plt.savefig(plot_path, dpi=300)
+plt.close(fig)

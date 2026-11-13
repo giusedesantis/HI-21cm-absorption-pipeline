@@ -47,7 +47,8 @@ from config_utils import load_config
 config = load_config()
 settings = config["post_imaging"]["back_resampling"]
 
-input_file = Path(settings["input_file"])
+#input_file = Path(settings["input_file"])
+input_file = Path(config["post_imaging"]["stacking"]["output_csv"])
 output_file = Path(settings["output_file"])
 original_dir = Path(settings["original_dir"])
 

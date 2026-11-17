@@ -30,7 +30,7 @@ The workflow consists of the following main stages:
 
 1. **Observation management:** Download MWA observations and track their processing status.
 2. **Imaging:** Produce radio images and spectral products using WSClean, including mask generation and image deconvolution.
-3. **Source analysis:** Extract source information and investigate machine-learning approaches to source localisation and spatial extent estimation.
+3. **Source localisation and flux extraction:** Extract source flux densities using conventional aperture method or the newer machine-learning-based approach, which uses a U-Net for source localisation and spatial extent estimation.
 4. **Spectral processing:** Apply frequency corrections, resampling, and continuum fitting and subtraction.
 5. **Spectral stacking:** Combine individual spectra using inverse-variance weighting to improve sensitivity.
 6. **Uncertainty propagation:** Account for spectral-channel covariance in subsequent resampling and filtering.

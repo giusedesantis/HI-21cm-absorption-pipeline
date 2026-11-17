@@ -18,8 +18,8 @@ The repository is organised into the following modules:
 |---|---|
 | `download/` | Observation downloading through the MWA ASVO service and processing-status management |
 | `bin/` | Imaging preparation, image masking, and WSClean-based image processing |
-| `flux_extract/` | Source flux-density and spectral extraction routines |
-| `ML/` | Machine-learning tools for source localisation and spatial extent estimation, including a U-Net implementation |
+| `flux_extract/` | Conventional source flux-density extraction routines |
+| `ML/` | Machine-learning-based approach to source localisation and spatial extent estimation, developed as an alternative to the conventional extraction method |
 | `post_imaging/` | Spectral corrections, resampling, continuum subtraction, stacking, covariance propagation, filtering, and plotting |
 | `slurm/` | SLURM scripts for coordinating and scheduling processing jobs on HPC systems |
 | `config/` | Centralised configuration files for data locations, target information, and processing settings |

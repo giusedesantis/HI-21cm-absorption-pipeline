@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Build spectral cubes exactly as before, but extract each fine-channel spectrum
-using the source pixels predicted on the MFS image by source_unet_mask_heatmap_32.py.
+using the source pixels predicted on the MFS image by unet_heatmap.py.
 
 For each obsid this script:
   1. Finds the saved U-Net source-mask NPZ for that obsid.
@@ -24,7 +24,7 @@ The U-Net inference output must contain, at minimum:
     mask_y_full, mask_x_full
 and preferably:
     mask_ra_deg, mask_dec_deg, full_image_shape
-as produced by source_unet_mask_heatmap_32.py.
+as produced by unet_heatmap.py.
 
 The source mask is fixed across all channel planes. This assumes the source
 footprint defined by the MFS image is appropriate across the fine-channel band.
